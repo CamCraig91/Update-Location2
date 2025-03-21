@@ -7,8 +7,8 @@
     </style>
   </head>
   <body>
-    <h1>Updating Your Location…</h1>
-    <p id="status">Acquiring GPS coordinates...</p>
+    <h1>Acquiring Your Location...</h1>
+    <p id="status">Please wait while we update your record.</p>
     <script>
       // Parse the recordId from the URL's query parameters.
       const params = new URLSearchParams(window.location.search);
@@ -21,36 +21,30 @@
           (position) => {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
-            document.getElementById('status').innerText =
-              'Coordinates obtained. Updating record...';
 
             // Set the Method:CRM API update endpoint URL.
             const updateEndpoint = 'https://api.methodcrm.com/records/update';
 
-            // Make the API call with the API key (update 'YOUR_API_KEY' accordingly).
+            // Make the API call with the provided API key.
             fetch(updateEndpoint, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                // Many APIs accept the key in a custom-header; adjust as required.
-                'Authorization': 'Apikey NjdkYzNiNmMxODQwNmI5YTI3NTdlOWVhLkJEQjFCNjNGMkY3QzQ1M0ZBMTE0Q0JBOTU2QzA0NjY4'
-                // Or, if required:
-                // 'Authorization': 'ApiKey YOUR_API_KEY'
+                'x-api-key': 'NjdkYzNiNmMxODQwNmI5YTI3NTdlOWVhLkJEQjFCNjNGMkY3QzQ1M0ZBMTE0Q0JBOTU2QzA0NjY4'
               },
               body: JSON.stringify({
-                recordId: recordId,
-                latitude: latitude,
-                longitude: longitude
+                table: 'CustomSchedule', // Target table to update
+                recordId: recordId,      // Pass the recordId dynamically
+                fields: {                // Fields to update
+                  ActualStartLatitude: latitude,
+                  ActualStartLongtitude: longitude
+                }
               })
             })
             .then(response => response.json())
-            .then(data => {
-              console.log('Record updated successfully:', data);
-              document.getElementById('status').innerText = 'Record updated successfully!';
-              // Close the window after a short delay.
-              setTimeout(() => {
-                window.close();
-              }, 1500);
+            .then(() => {
+              // Close the window immediately after a successful update.
+              window.close();
             })
             .catch(error => {
               console.error('Error updating record:', error);
@@ -73,3 +67,4 @@
     </script>
   </body>
 </html>
+
