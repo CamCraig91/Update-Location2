@@ -11,7 +11,8 @@
   <body>
     <h1>Acquiring Your Location...</h1>
     <p id="status">Please wait while we update your record.</p>
-    <pre id="json-output"></pre> <!-- Display JSON response here -->
+    <h3>JSON Payload Sent:</h3>
+    <pre id="json-output"></pre> <!-- This is where the outgoing JSON payload will appear -->
     <script>
       // Parse the recordId and authorization code from the URL's query parameters.
       const params = new URLSearchParams(window.location.search);
@@ -29,6 +30,17 @@
             // Construct the Method:CRM API endpoint URL with the recordId in the path.
             const updateEndpoint = `https://rest.method.me/api/v1/tables/CustomSchedule/${recordId}`;
 
+            // Create the JSON payload to be sent
+            const payload = {
+              data: {
+                ActualStartLatitude: latitude.toString(),
+                ActualStartLongitude: longitude.toString()
+              }
+            };
+
+            // Display the JSON payload on the webpage
+            document.getElementById('json-output').innerText = JSON.stringify(payload, null, 2);
+
             // Make the PATCH request to update the record.
             fetch(updateEndpoint, {
               method: 'PATCH',
@@ -36,31 +48,24 @@
                 'Content-Type': 'application/json',
                 'Authorization': `APIKey ${authCode}` // Use the authorization code passed dynamically
               },
-              body: JSON.stringify({
-                data: { // Wrap fields in "data" as required by the API
-                  ActualStartLatitude: latitude.toString(), // Send latitude as a string
-                  ActualStartLongitude: longitude.toString() // Send longitude as a string
-                }
-              })
+              body: JSON.stringify(payload) // Send the payload
             })
             .then(response => {
               console.log('Raw Response:', response); // Log the raw response for debugging
 
-              // Check if the response has a body
+              // Handle success or show errors if present
               if (response.status === 204) {
-                document.getElementById('json-output').innerText = "Update successful (204 No Content).";
-                window.close(); // Immediately close the page on success
+                window.close(); // Close the page on success
               } else {
-                // Try to parse JSON, or show raw text if not JSON
                 return response.json()
                   .then(data => {
-                    console.log('JSON Response:', data); // Log JSON response
-                    document.getElementById('json-output').innerText = JSON.stringify(data, null, 2);
+                    console.error('API Error:', data);
+                    document.getElementById('status').innerText = 'Error updating record.';
                   })
                   .catch(() => {
                     response.text().then(text => {
-                      console.log('Text Response:', text); // Log text response
-                      document.getElementById('json-output').innerText = text || 'No JSON response.';
+                      console.log('Text Response:', text);
+                      document.getElementById('status').innerText = 'Error updating record: ' + text;
                     });
                   });
               }
