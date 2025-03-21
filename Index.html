@@ -1,16 +1,17 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
     <title>Updating Your Record...</title>
     <style>
       body { font-family: Arial, sans-serif; text-align: center; padding-top: 2em; }
-      #json-output { margin-top: 1em; font-family: Courier, monospace; color: #333; }
+      #json-output { margin-top: 1em; font-family: Courier, monospace; color: #333; white-space: pre-wrap; }
     </style>
   </head>
   <body>
     <h1>Acquiring Your Location...</h1>
     <p id="status">Please wait while we update your record.</p>
-    <pre id="json-output"></pre> <!-- This is where the JSON text will be shown -->
+    <pre id="json-output"></pre> <!-- Display JSON response here -->
     <script>
       // Parse the recordId and authorization code from the URL's query parameters.
       const params = new URLSearchParams(window.location.search);
@@ -43,15 +44,25 @@
               })
             })
             .then(response => {
-              // Show the response JSON on the page for easy copying.
-              response.json().then(data => {
-                document.getElementById('json-output').innerText = JSON.stringify(data, null, 2);
-              });
+              console.log('Raw Response:', response); // Log the raw response for debugging
 
+              // Check if the response has a body
               if (response.status === 204) {
+                document.getElementById('json-output').innerText = "Update successful (204 No Content).";
                 window.close(); // Immediately close the page on success
               } else {
-                document.getElementById('status').innerText = 'Error updating record.';
+                // Try to parse JSON, or show raw text if not JSON
+                return response.json()
+                  .then(data => {
+                    console.log('JSON Response:', data); // Log JSON response
+                    document.getElementById('json-output').innerText = JSON.stringify(data, null, 2);
+                  })
+                  .catch(() => {
+                    response.text().then(text => {
+                      console.log('Text Response:', text); // Log text response
+                      document.getElementById('json-output').innerText = text || 'No JSON response.';
+                    });
+                  });
               }
             })
             .catch(error => {
