@@ -9,9 +9,8 @@
   <body>
     <h1>Updating Your Location…</h1>
     <p id="status">Acquiring GPS coordinates...</p>
-
     <script>
-      // Retrieve recordId from the query string.
+      // Parse the recordId from the URL's query parameters.
       const params = new URLSearchParams(window.location.search);
       const recordId = params.get('recordId');
 
@@ -22,17 +21,21 @@
           (position) => {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
-            
             document.getElementById('status').innerText =
               'Coordinates obtained. Updating record...';
-            
-            // Call the Method:CRM API to update the record.
-            fetch('https://api.methodcrm.com/records/update', {  
+
+            // Set the Method:CRM API update endpoint URL.
+            const updateEndpoint = 'https://api.methodcrm.com/records/update';
+
+            // Make the API call with the API key (update 'YOUR_API_KEY' accordingly).
+            fetch(updateEndpoint, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                // Replace YOUR_METHOD_API_TOKEN with the actual token.
-                'Authorization': 'Bearer YOUR_METHOD_API_TOKEN'
+                // Many APIs accept the key in a custom-header; adjust as required.
+                'Authorization': 'Apikey NjdkYzNiNmMxODQwNmI5YTI3NTdlOWVhLkJEQjFCNjNGMkY3QzQ1M0ZBMTE0Q0JBOTU2QzA0NjY4'
+                // Or, if required:
+                // 'Authorization': 'ApiKey YOUR_API_KEY'
               },
               body: JSON.stringify({
                 recordId: recordId,
@@ -40,37 +43,32 @@
                 longitude: longitude
               })
             })
-            .then(response => {
-              // Optionally check for HTTP errors here.
-              return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
               console.log('Record updated successfully:', data);
-              document.getElementById('status').innerText =
-                'Record updated successfully!';
-              // Wait a short time, then close the window.
+              document.getElementById('status').innerText = 'Record updated successfully!';
+              // Close the window after a short delay.
               setTimeout(() => {
                 window.close();
-                // If window.close() doesn’t work, you might want to redirect instead:
-                // window.location.href = "https://your.methodcrm.com/returnPage";
               }, 1500);
             })
             .catch(error => {
               console.error('Error updating record:', error);
-              document.getElementById('status').innerText =
-                'Error updating record. Please try again.';
+              document.getElementById('status').innerText = 'Error updating record.';
             });
           },
           (error) => {
-            document.getElementById('status').innerText =
-              'Error obtaining location: ' + error.message;
             console.error('Error obtaining location:', error);
+            document.getElementById('status').innerText = 'Error obtaining location: ' + error.message;
           },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
         );
       } else {
-        document.getElementById('status').innerText =
-          'Geolocation is not supported by your browser.';
+        document.getElementById('status').innerText = 'Geolocation is not supported by your browser.';
       }
     </script>
   </body>
