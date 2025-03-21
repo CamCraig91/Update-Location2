@@ -26,30 +26,40 @@
             const updateEndpoint = 'https://api.methodcrm.com/records/update';
 
             // Make the API call with the provided API key.
-            fetch(updateEndpoint, {
+           fetch(updateEndpoint, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': APIKey'NjdkYzNiNmMxODQwNmI5YTI3NTdlOWVhLkJEQjFCNjNGMkY3QzQ1M0ZBMTE0Q0JBOTU2QzA0NjY4'
+          headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'NjdkYzNiNmMxODQwNmI5YTI3NTdlOWVhLkJEQjFCNjNGMkY3QzQ1M0ZBMTE0Q0JBOTU2QzA0NjY4'
               },
-              body: JSON.stringify({
-                table: 'CustomSchedule', // Target table to update
-                recordId: recordId,      // Pass the recordId dynamically
-                fields: {                // Fields to update
-                  ActualStartLatitude: latitude,
-                  ActualStartLongtitude: longitude
-                }
-              })
+            body: JSON.stringify({
+          table: 'CustomSchedule',
+        recordId: recordId,
+            fields: {
+              ActualStartLatitude: latitude,
+          ActualStartLongtitude: longitude
+            }
             })
-            .then(response => response.json())
-            .then(() => {
-              // Close the window immediately after a successful update.
-              window.close();
-            })
-            .catch(error => {
-              console.error('Error updating record:', error);
-              document.getElementById('status').innerText = 'Error updating record.';
-            });
+        })
+  .then(response => {
+    // Convert response to JSON and log for debugging
+    return response.json().then(data => {
+      console.log('API Response:', data); // Log the full API response for debugging
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${data.message}`);
+      }
+      return data;
+    });
+  })
+  .then(data => {
+    console.log('Record updated successfully:', data);
+    window.close(); // Close the window automatically on success
+  })
+  .catch(error => {
+    console.error('Error updating record:', error);
+    document.getElementById('status').innerText = 'Error updating record.';
+  });
+
           },
           (error) => {
             console.error('Error obtaining location:', error);
