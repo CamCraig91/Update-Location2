@@ -34,7 +34,7 @@
                 'Authorization': `APIKey ${authCode}` // Use the authorization code passed dynamically
               },
               body: JSON.stringify({
-                { // Wrap fields in "data" as required by the API
+                {
                   ActualStartLatitude: latitude.toString(), // Send latitude as a string
                   ActualStartLongitude: longitude.toString() // Send longitude as a string
                 }
